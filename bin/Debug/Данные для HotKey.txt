@@ -1,0 +1,197 @@
+Control ^
+Shift +
+Alt %
+None
+LButton
+RButton
+Cancel {Break}
+MButton
+XButton1
+XButton2
+Back {BackSpace}
+Tab {Tab}
+LineFeed
+Clear
+Enter {Enter}
+Return {Enter}
+ShiftKey {+}
+ControlKey {^}
+Menu {%}
+Pause {Break}
+CapsLock {CapsLock}
+Capital {CapsLock}
+HangulMode
+HanguelMode
+KanaMode
+JunjaMode
+FinalMode
+KanjiMode
+HanjaMode
+Escape
+IMEConvert
+IMENonconvert
+IMEAccept
+IMEAceept
+IMEModeChange
+Space
+Prior {PgUp}
+PageUp {PgUp}
+PageDown {PgDn}
+Next {PgDn}
+End {End}
+Home {Home}
+Left {Left}
+Up {Up}
+Right {Right}
+Down {Down}
+Select
+Print
+Execute
+Snapshot
+PrintScreen {PRTSC}
+Insert {Insert}
+Delete {Delete}
+Help
+D0 {0}
+D1 {1}
+D2 {2}
+D3 {3}
+D4 {4}
+D5 {5}
+D6 {6}
+D7 {7}
+D8 {8}
+D9 {9}
+A {a}
+B {b}
+C {c}
+D {d}
+E {e}
+F {f}
+G g
+H h
+I i
+J j
+K k
+L l
+M m
+N n
+O o
+P p
+Q q
+R r
+S s
+T t
+U u
+V v
+W w
+X x
+Y y
+Z z
+LWin
+RWin
+Apps
+Sleep
+NumPad0
+NumPad1
+NumPad2
+NumPad3
+NumPad4
+NumPad5
+NumPad6
+NumPad7
+NumPad8
+NumPad9
+Multiply
+Add Add
+Separator
+Subtract Subtract
+Decimal
+Divide /
+F1 f1
+F2 f2
+F3 f3
+F4 f4
+F5 f5
+F6 f6
+F7 f7
+F8 f8
+F9 f9
+F10 f10
+F11 f11
+F12 f12
+F13 f13
+F14 f14
+F15 f15
+F16 f16
+F17 f17
+F18 f18
+F19 f19
+F20 f20
+F21 f21
+F22 f22
+F23 f23
+F24 f24
+NumLock NumLock
+Scroll SCROLLLOCK
+LShiftKey
+RShiftKey
+LControlKey
+RControlKey
+LMenu
+RMenu
+BrowserBack
+BrowserForward
+BrowserRefresh
+BrowserStop
+BrowserSearch
+BrowserFavorites
+BrowserHome
+VolumeMute
+VolumeDown
+VolumeUp
+MediaNextTrack
+MediaPreviousTrack
+MediaStop
+MediaPlayPause
+LaunchMail
+SelectMedia
+LaunchApplication1
+LaunchApplication2
+OemSemicolon
+Oem1 ;
+Oemplus =
+Oemcomma ,
+OemMinus -
+OemPeriod .
+Oem2
+OemQuestion /
+Oem3
+Oemtilde `
+Oem4
+OemOpenBrackets [
+OemPipe
+Oem5 \\
+OemCloseBrackets
+Oem6 ]
+OemQuotes
+Oem7 '
+Oem8
+Oem102
+OemBackslash
+ProcessKey
+Packet
+Attn
+Crsel
+Exsel
+EraseEof
+Play
+Zoom
+NoName
+Pa1
+OemClear
+KeyCode
+//Shift
+//Control
+//Alt
+Modifiers

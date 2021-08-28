@@ -1,0 +1,7 @@
+c:\users\alex\documents\visual studio 2010\Projects\DR\bin\Debug\DR.exe
+c:\users\alex\documents\visual studio 2010\Projects\DR\bin\Debug\DR.pdb
+c:\users\alex\documents\visual studio 2010\Projects\DR\obj\x86\Debug\DR.exe
+c:\users\alex\documents\visual studio 2010\Projects\DR\obj\x86\Debug\DR.pdb
+c:\users\alex\documents\visual studio 2010\Projects\DR\obj\x86\Debug\DR.Form1.resources
+c:\users\alex\documents\visual studio 2010\Projects\DR\obj\x86\Debug\DR.csproj.GenerateResource.Cache
+C:\Users\Alex\documents\visual studio 2010\Projects\DR\obj\x86\Debug\DR.Settings.resources
