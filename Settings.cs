@@ -17,7 +17,7 @@ namespace DR
     {
         const string fileNameHotKeys = "listKeyboardKeys.dat";
         
-        public Dictionary <string, Hotkey> dictionaryKeyboardKeys = new Dictionary <string, Hotkey>();
+        public static Dictionary <string, Hotkey> dictionaryKeyboardKeys = new Dictionary <string, Hotkey>();
         
         public Settings()
         {
@@ -96,13 +96,13 @@ namespace DR
 
         private void removecode_Click(object sender, EventArgs e)
         {
-            RemoteControl.preset.dictionaryBindings.Remove(code.Text);
+            RemoteControl.preset.RemoveBinding(code.Text);
             code.Clear();
             hotkey.Clear();
             code.Focus();
         }
 
-        bool preparingOfSending(ref string message)
+        public static bool preparingOfSending(ref string message)
         {
             StringBuilder temp = new StringBuilder();
 
@@ -151,37 +151,20 @@ namespace DR
 
                 if (preparingOfSending(ref message))
                 {
-
-                    Hotkey hkey = new Hotkey(hotkey.Text, message);
-
-                    if (RemoteControl.preset.processName == "")
-                        RemoteControl.preset.processName = processName.Text;
-
-                    if (RemoteControl.preset.dictionaryBindings.ContainsKey(code.Text)) // если код уже есть в словаре
-                    {
-                        // если такая привязка уже есть
-                        if (RemoteControl.preset.dictionaryBindings[code.Text].hotkeyTextBox == hkey.hotkeyTextBox
-                              && RemoteControl.preset.dictionaryBindings[code.Text].hotkeyForSending == hkey.hotkeyForSending) 
-                        {
-                            MessageBox.Show("The binding already exists!");
-                            addbinding.Enabled = false;
-                            hotkey.Focus();
-                            //return;
-                        }
-                        else
-                            RemoteControl.preset.dictionaryBindings[code.Text] = hkey; // то меняем ему привязку
-                    }
-                    else // если кода нет в словаре, то добавляем новый код с привязкой
+                    if (RemoteControl.preset.AddBinding(code.Text, hotkey.Text, message))
                     {
 
-                        RemoteControl.preset.dictionaryBindings.Add(code.Text, hkey);
-                        
-
+                        //hotkey.Clear();
+                        hotkey.Focus();
+                        addbinding.Enabled = false;
+                        //code.Focus();
                     }
-                    //hotkey.Clear();
-                    hotkey.Focus();
-                    addbinding.Enabled = false;
-                    //code.Focus();
+                    else
+                    {
+                        MessageBox.Show("The binding already exists!");
+                        addbinding.Enabled = false;
+                        hotkey.Focus();
+                    }
                     
                 }
                 else

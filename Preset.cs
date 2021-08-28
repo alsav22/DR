@@ -91,29 +91,36 @@ namespace DR
         public string name = "";
         public const int capacityList = 2;
 
-       
 
-        //public bool AddHotKey(string code, string hotKey)
-        //{
-        //    try
-        //    {
-        //        List<string> list = new List<string>(Preset.capacityList);
-        //        for (int i = 0; i < list.Capacity; ++i)
-        //            list.Insert(i, hotKey);
-        //        dictionary.Add(code, list);
-                
-                
-        //        //dictionary[code] = hotkey;
-        //        dictionary[code].Add(hotKey);
-        //    }
-        //    catch
-        //    {
-        //        MessageBox.Show("Code no found!");
-        //        return false;
-        //    }
-        //    MessageBox.Show("Key added successfully.");
-        //    return true;
-        //}
+
+        public bool AddBinding(string code, string hotKey, string message)
+        {
+            Hotkey hkey = new Hotkey(hotKey, message);
+
+            //if (RemoteControl.preset.processName == "")
+                //RemoteControl.preset.processName = processName.Text;
+
+            if (dictionaryBindings.ContainsKey(code)) // если код уже есть в словаре
+            {
+                // если такая привязка уже есть
+                if (dictionaryBindings[code].hotkeyTextBox == hkey.hotkeyTextBox
+                      && dictionaryBindings[code].hotkeyForSending == hkey.hotkeyForSending)
+                {
+                    
+                    return false;
+                }
+                else
+                {
+                    dictionaryBindings[code] = hkey; // то меняем ему привязку
+                    return true;
+                }
+            }
+            else // если кода нет в словаре, то добавляем новый код с привязкой
+            {
+                dictionaryBindings.Add(code, hkey);
+                return true;
+            }
+        }
 
         public bool RemoveBinding(string code)
         {
@@ -123,47 +130,10 @@ namespace DR
                 return false;
         }
 
-        //public bool AddCode(string code)
-        //{
-        //    try
-        //    {
-        //        //dictionary.Add(code, "");
-        //        List<string> list = new List<string>(Preset.capacityList);
-        //        for (int i = 0; i < list.Capacity; ++i)
-        //            list.Insert(i, "");
-        //        dictionary.Add(code, list);
-        //    }
-        //    catch
-        //    {
-        //        MessageBox.Show("The code already exists!");
-        //        return false;
-        //    }
-        //    MessageBox.Show("Code added successfully.");
-        //    return true;
-        //}
-
-        //public bool RemoveCode(string code)
-        //{
-        //    if (dictionary.Remove(code))
-        //    {
-        //        MessageBox.Show("Code successfully removed.");
-        //        return true;
-        //    }
-        //    MessageBox.Show("Code not found!");
-        //    return false;
-        //}
-
         
-        //public void foo()
-        //{
-
-        //    string fileName = "Коды пульта (слева направо).txt";
-        //    if (readData(dictionary, fileName))
-        //    {
-        //        fileName = "Data.txt";
-        //        writeData(dictionary, fileName);
-        //    }
-        //}
+        
+        
+        
         
         
 
