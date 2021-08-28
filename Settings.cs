@@ -11,87 +11,14 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace DR
 {
-    
-    
     public partial class Settings : Form
     {
-        const string fileNameHotKeys = "listKeyboardKeys.dat";
-        
-        Dictionary <string, Hotkey> dictionaryKeyboardKeys = new Dictionary <string, Hotkey>();
-        
         public Settings()
         {
             InitializeComponent();
             code.ReadOnly = true;
             hotkey.ReadOnly = true;
             removebinding.Enabled = false;
-        }
-
-        public bool readHotKeys()
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            try
-            {
-                using (FileStream fs = new FileStream(fileNameHotKeys, FileMode.Open))
-                {
-                    dictionaryKeyboardKeys = (Dictionary<string, Hotkey>)formatter.Deserialize(fs);
-                    return true;
-                }
-            }
-            catch
-            {
-                MessageBox.Show("File " + fileNameHotKeys + " not found!");
-                return false;
-            }
-
-            /////////////////// разово, для первой инициализации словаря с горячими клавишами
-            //string fileName = "listKeyboardKeys.txt";
-            //try
-            //{
-                
-            //    using (StreamReader sr = new StreamReader(fileName))
-            //    {
-            //        string str;
-            //        while ((str = sr.ReadLine()) != null)
-            //        {
-
-            //            string[] parts = str.Split(' ');
-            //            if (parts.Length >= 2)
-            //            {
-            //                if (parts[0] == "Space")
-            //                    parts[1] = " ";
-            //                dictionaryKeyboardKeys.Add(parts[0], new Hotkey(parts[0], parts[1]));
-
-            //            }
-            //            else
-            //            {
-            //                dictionaryKeyboardKeys.Add(parts[0], new Hotkey(parts[0], null));
-
-            //            }
-            //        }
-
-            //        sr.Close();
-            //        writeHotKeys();
-                    
-            //        return true;
-            //    }
-            //}
-            //catch
-            //{
-            //    MessageBox.Show("File " + fileName + " not found!");
-            //    return false;
-            //}
-
-        }
-
-        void writeHotKeys()
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-
-            using (FileStream fs = new FileStream(fileNameHotKeys, FileMode.OpenOrCreate))
-            {
-                formatter.Serialize(fs, dictionaryKeyboardKeys);
-            }
         }
 
         private void removecode_Click(object sender, EventArgs e)
@@ -101,34 +28,6 @@ namespace DR
             hotkey.Clear();
             code.Focus();
         }
-
-        public bool preparingOfSending(ref string message)
-        {
-            StringBuilder temp = new StringBuilder();
-
-            char[] sep = { '+' };
-            string[] parts = message.Split(sep);
-            
-            int i = 0;
-            try
-            {
-                for ( ; i < parts.Length; ++i)
-                {
-
-                    temp.Append(dictionaryKeyboardKeys[parts[i]].hotkeyForSending);
-                }
-            }
-            catch
-            {
-                message = null;
-                MessageBox.Show("Key " + parts[i] + " not found in the list!");
-                return false;
-            }
-            
-            message = temp.ToString();
-            return true;
-            
-        }
         
         private void addbinding_Click(object sender, EventArgs e)
         {
@@ -137,64 +36,36 @@ namespace DR
                 code.Clear();
                 hotkey.Clear();
                 code.Focus();
-                //return;
             }
             else if (hotkey.Text == "")
             {
                 MessageBox.Show("Press the keys on your keyboard!");
                 hotkey.Focus();
-                //return;
             }
             else
             {
-                string message = hotkey.Text;
-
-                if (preparingOfSending(ref message))
+                if (RemoteControl.preset.AddBinding(code.Text, hotkey.Text))
                 {
-                    if (RemoteControl.preset.AddBinding(code.Text, hotkey.Text, message))
-                    {
-
-                        //hotkey.Clear();
-                        
-                        //code.Focus();
-                    }
-                    else
-                    {
-                        MessageBox.Show("The binding already exists!");
-                        
-                    }
-                    //hotkey.Focus();
-                    //addbinding.Enabled = false;
+                    MessageBox.Show("Done!");
                     
                 }
-                
-                    //hotkey.Clear();
+                else
+                {
+                    MessageBox.Show("The binding already exists!");
+                }
+                   
                 hotkey.Focus();
                 addbinding.Enabled = false;
-                    //code.Focus();
-                
+                //code.Focus();
             }
         }
 
         private void removebinding_Click(object sender, EventArgs e)
         {
-            
-            
-            //try
-            //{
             RemoteControl.preset.RemoveBinding(code.Text);
-            //if (RemoteControl.preset.dictionaryBindings.Remove(code.Text))
-            //{
-                //code.Clear();
-                //hotkey.Clear();
-                //code.Focus();
-            //}
-            //else
-                //MessageBox.Show("Code not found!");
-            //code.Clear();
+            
             hotkey.Clear();
             hotkey.Focus();
-            //removebinding.Enabled = false;
         }
 
         private void addpreset_Click(object sender, EventArgs e)
@@ -208,8 +79,6 @@ namespace DR
                 preset.name = presetName.Text;
                 RemoteControl.preset = preset;
                 RemoteControl.listPresets.Add(preset);
-                //RemoteControl.savePresets();
-                //RemoteControl.settings.Close();
             }
         }
 
@@ -234,9 +103,7 @@ namespace DR
                 {
                     presetName.SelectedIndex = 0;
                     RemoteControl.preset = RemoteControl.listPresets[0];
-                    //RemoteControl.presetName = RemoteControl.preset.name;
                     RemoteControl.form.PresetNameText = RemoteControl.preset.name;
-                    
                 }
                 else
                 {
@@ -434,51 +301,4 @@ namespace DR
         }
     }
 
-    
-
-        //void fromTextBoxToSending()
-        //{
-        //    StringBuilder temp = new StringBuilder();
-
-        //    char[] sep = { '+' };
-        //    string[] parts = hotkeyTextBox.Split(sep);
-
-        //    for (int i = 0; i < parts.Length; ++i)
-        //    {
-
-        //        if (parts[i] == "Control")
-        //        {
-        //            temp.Append('^');
-        //        }
-        //        else if (parts[i] == "Shift")
-        //        {
-        //            temp.Append('+');
-        //        }
-        //        else if (parts[i] == "Alt")
-        //        {
-        //            temp.Append('%');
-        //        }
-        //        else if (parts[i] == "Space")
-        //        {
-        //            temp.Append(' ');
-        //        }
-        //        else if (parts[i] == "OemPeriod")
-        //        {
-        //            temp.Append('.');
-        //        }
-        //        else if (parts[i] == "Oemcomma")
-        //        {
-        //            temp.Append(',');
-        //        }
-        //        else
-        //            temp.Append(parts[i]);
-        //    }
-
-
-        //    hotkeyForSending = temp.ToString();
-
-        //}
-
-
-    
 }

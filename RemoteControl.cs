@@ -14,9 +14,12 @@ namespace DR
 {
     class RemoteControl
     {
-        const  string fileNamePresets = "presets.dat";
-       
+        const string fileNameKeyboardKeys = "listKeyboardKeys.dat";
+        public static Dictionary<string, Hotkey> dictionaryKeyboardKeys = new Dictionary<string, Hotkey>();
+
+        const string fileNamePresets = "presets.dat";
         public static List <Preset> listPresets = new List <Preset>();
+        
         public static bool flagSettings = false; // флаг работы в режиме настроек
         public static string presetNameBeforeClosing = ""; // имя пресета перед закрытием
 
@@ -24,37 +27,6 @@ namespace DR
         public static Settings settings;
         public static Preset preset;
         public static Form1 form;
-
-        
-
-       // public void OK_Click(object sender, EventArgs e)
-       // {
-       //      Console.WriteLine("RemoteControl.OK_Click");
-
-       //      //if (deviceSearch(ref device))
-       //      //{
-       //      //    connection(ref device);
-       //      //    form.portName.Text = device.portName;
-       //      //    MessageBox.Show("The device is connected and ready for use.");
-
-       //      //    form.ok.Hide();
-       //      //    form.id_vid.ReadOnly = true;
-       //      //    form.id_pid.ReadOnly = true;
-       //      //    form.processName.ReadOnly = true;
-       //      //    form.ActiveControl = null;
-
-       //      //    form.WindowState = FormWindowState.Minimized;
-
-       //      //    device.writeData(Device.fileName, form.id_vid.Text, form.id_pid.Text);
-
-       //      //}
-       //      //else
-       //      //{
-       //      //    MessageBox.Show("Device not found!");
-       //      //    form.id_vid.Focus();
-       //      //}
-
-       //}
 
         public void start()
         {
@@ -75,10 +47,6 @@ namespace DR
             form = new Form1(device.portName, device.ID_VID, device.ID_PID);
             form.Show();
             
-            //form.ok.Click += OK_Click;
-            //if (RemoteControl.lilstPresets.Count == 0)
-            //form.buttonSettings.Hide();
-
             if (device.portName != "" && device.portName != null)
             {
                 MessageBox.Show("The device is connected and ready for use.");
@@ -99,7 +67,7 @@ namespace DR
                     MessageBox.Show("There are no presets. Create at least one.");
                     preset = new Preset();
                     settings = new Settings();
-                    if (settings.readHotKeys()) // загрузка из файла списка всех горячих клавиш
+                    if (readKeyboardKeys()) // загрузка из файла списка всех горячих клавиш
                                                 // в файле строки типа: Control ^, или PageUp {PgUp},
                                                 // т.е., до пробела то, что выводится при нажатии на клавишу,
                                                 // после пробела то, что нужно отправлять через SendKeys.
@@ -123,10 +91,10 @@ namespace DR
                     presetNameBeforeClosing = preset.name;
                     
                     settings = new Settings();
-                    if (settings.readHotKeys()) // загрузка из файла списка всех горячих клавиш
-                                                // в файле строки типа: Control ^, или PageUp {PgUp},
-                                                // т.е., до пробела то, что выводится при нажатии на клавишу,
-                                                // после пробела то, что нужно отправлять через SendKeys.
+                    if (readKeyboardKeys()) // загрузка из файла списка всех клавиш.
+                                            // В файле строки, типа: Control ^, или PageUp {PgUp},
+                                            // т.е., до пробела то, что выводится при нажатии на клавишу,
+                                            // после пробела то, что нужно отправлять через SendKeys.
                     {
                         for (int i = 0; i < listPresets.Count; ++i)
                         {
@@ -141,6 +109,73 @@ namespace DR
                 }
             }
             
+        }
+
+        public bool readKeyboardKeys()
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            try
+            {
+                using (FileStream fs = new FileStream(fileNameKeyboardKeys, FileMode.Open))
+                {
+                    dictionaryKeyboardKeys = (Dictionary<string, Hotkey>)formatter.Deserialize(fs);
+                    return true;
+                }
+            }
+            catch
+            {
+                MessageBox.Show("File " + fileNameKeyboardKeys + " not found!");
+                return false;
+            }
+
+            /////////////////// разово, для первой инициализации словаря с горячими клавишами
+            //string fileName = "listKeyboardKeys.txt";
+            //try
+            //{
+
+            //    using (StreamReader sr = new StreamReader(fileName))
+            //    {
+            //        string str;
+            //        while ((str = sr.ReadLine()) != null)
+            //        {
+
+            //            string[] parts = str.Split(' ');
+            //            if (parts.Length >= 2)
+            //            {
+            //                if (parts[0] == "Space")
+            //                    parts[1] = " ";
+            //                dictionaryKeyboardKeys.Add(parts[0], new Hotkey(parts[0], parts[1]));
+
+            //            }
+            //            else
+            //            {
+            //                dictionaryKeyboardKeys.Add(parts[0], new Hotkey(parts[0], null));
+
+            //            }
+            //        }
+
+            //        sr.Close();
+            //        writeHotKeys();
+
+            //        return true;
+            //    }
+            //}
+            //catch
+            //{
+            //    MessageBox.Show("File " + fileName + " not found!");
+            //    return false;
+            //}
+
+        }
+
+        void writeKeyboardKeys()
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            using (FileStream fs = new FileStream(fileNameKeyboardKeys, FileMode.OpenOrCreate))
+            {
+                formatter.Serialize(fs, dictionaryKeyboardKeys);
+            }
         }
 
         static public bool loadPresets()
@@ -419,31 +454,6 @@ namespace DR
             Thread.Sleep(200);
             if (device.serialPort.IsOpen)
                 device.serialPort.DiscardInBuffer();
-        }
-
-       
-
-        void fff()
-        {
-            
-            string[] arr = {"?", "~", ">", "<", "+", "_", 
-                             "(", ")", "&", "{", "}", "$", "@",
-                             "!", "|", "^", "%"};
-            SendKeys.SendWait("{PrtSc}");
-            Thread.Sleep(3000);
-            for (int i = 0; i < arr.Length; ++i)
-            {
-                try
-                {
-
-                    SendKeys.SendWait("{" + arr[i] + "}");
-                    Thread.Sleep(3000);
-                }
-                catch
-                {
-                    MessageBox.Show("Error!");
-                }
-            }
         }
 
         private void workingMode() // рабочий режим

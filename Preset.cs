@@ -112,36 +112,72 @@ namespace DR
         public string name = "";
         public const int capacityList = 2;
 
-
-
-        public bool AddBinding(string code, string hotKey, string message)
+        bool preparingOfSending(ref string message)
         {
-            using (Hotkey hkey = new Hotkey(hotKey, message))
+            StringBuilder temp = new StringBuilder();
+
+            char[] sep = { '+' };
+            string[] parts = message.Split(sep);
+
+            int i = 0;
+            try
+            {
+                for (; i < parts.Length; ++i)
+                {
+
+                    temp.Append(RemoteControl.dictionaryKeyboardKeys[parts[i]].hotkeyForSending);
+                }
+            }
+            catch
+            {
+                message = null;
+                MessageBox.Show("Key " + parts[i] + " not found in the list!");
+                return false;
+            }
+
+            message = temp.ToString();
+            return true;
+
+        }
+
+        public bool AddBinding(string code, string hotkey)
+        {
+            string message = hotkey;
+
+            if (preparingOfSending(ref message))
             {
 
-            //if (processName == "")
-                //processName = processName.Text;
-
-                if (dictionaryBindings.ContainsKey(code)) // если код уже есть в словаре
+                using (Hotkey hkey = new Hotkey(hotkey, message))
                 {
-                    // если такая привязка уже есть
-                    if (dictionaryBindings[code].hotkeyTextBox == hkey.hotkeyTextBox
-                          && dictionaryBindings[code].hotkeyForSending == hkey.hotkeyForSending)
+
+                    //if (processName == "")
+                    //processName = processName.Text;
+
+                    if (dictionaryBindings.ContainsKey(code)) // если код уже есть в словаре
                     {
-                    
-                        return false;
+                        // если такая привязка уже есть
+                        if (dictionaryBindings[code].hotkeyTextBox == hkey.hotkeyTextBox
+                              && dictionaryBindings[code].hotkeyForSending == hkey.hotkeyForSending)
+                        {
+
+                            return false;
+                        }
+                        else
+                        {
+                            dictionaryBindings[code] = hkey; // то меняем ему привязку
+                            return true;
+                        }
                     }
-                    else
+                    else // если кода нет в словаре, то добавляем новый код с привязкой
                     {
-                        dictionaryBindings[code] = hkey; // то меняем ему привязку
+                        dictionaryBindings.Add(code, hkey);
                         return true;
                     }
                 }
-                else // если кода нет в словаре, то добавляем новый код с привязкой
-                {
-                    dictionaryBindings.Add(code, hkey);
-                    return true;
-                }
+            }
+            else
+            {
+                return false;
             }
         }
 
