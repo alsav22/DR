@@ -115,22 +115,13 @@ namespace DR
         //    return true;
         //}
 
-        //public bool RemoveHotKey(string code)
-        //{
-        //    try
-        //    {
-        //        //dictionary[code] = "";
-        //        for (int i = 0; i < dictionary[code].Count; ++i)
-        //            dictionary[code][i] = "";
-        //    }
-        //    catch
-        //    {
-        //        MessageBox.Show("Code no found!");
-        //        return false;
-        //    }
-        //    MessageBox.Show("Key successfully removed.");
-        //    return true;
-        //}
+        public bool RemoveBinding(string code)
+        {
+            if (dictionaryBindings.Remove(code))
+                return true;
+            else
+                return false;
+        }
 
         //public bool AddCode(string code)
         //{

@@ -200,7 +200,7 @@ namespace DR
             
             //try
             //{
-            RemoteControl.preset.dictionaryBindings.Remove(code.Text);
+            RemoteControl.preset.RemoveBinding(code.Text);
             //if (RemoteControl.preset.dictionaryBindings.Remove(code.Text))
             //{
                 //code.Clear();
