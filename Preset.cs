@@ -81,6 +81,27 @@ namespace DR
     
     
     //}
+
+    [Serializable]
+    public class Hotkey : IDisposable
+    {
+
+
+        public Hotkey(string textBox, string message)
+        {
+            hotkeyTextBox = textBox;
+            hotkeyForSending = message;
+        }
+
+        public string hotkeyTextBox { get; set; }
+        public string hotkeyForSending { get; set; }
+
+        public void Dispose()
+        {
+            
+        }
+
+    }
     
     
     [Serializable]
@@ -95,30 +116,32 @@ namespace DR
 
         public bool AddBinding(string code, string hotKey, string message)
         {
-            Hotkey hkey = new Hotkey(hotKey, message);
-
-            //if (RemoteControl.preset.processName == "")
-                //RemoteControl.preset.processName = processName.Text;
-
-            if (dictionaryBindings.ContainsKey(code)) // если код уже есть в словаре
+            using (Hotkey hkey = new Hotkey(hotKey, message))
             {
-                // если такая привязка уже есть
-                if (dictionaryBindings[code].hotkeyTextBox == hkey.hotkeyTextBox
-                      && dictionaryBindings[code].hotkeyForSending == hkey.hotkeyForSending)
+
+            //if (processName == "")
+                //processName = processName.Text;
+
+                if (dictionaryBindings.ContainsKey(code)) // если код уже есть в словаре
                 {
+                    // если такая привязка уже есть
+                    if (dictionaryBindings[code].hotkeyTextBox == hkey.hotkeyTextBox
+                          && dictionaryBindings[code].hotkeyForSending == hkey.hotkeyForSending)
+                    {
                     
-                    return false;
+                        return false;
+                    }
+                    else
+                    {
+                        dictionaryBindings[code] = hkey; // то меняем ему привязку
+                        return true;
+                    }
                 }
-                else
+                else // если кода нет в словаре, то добавляем новый код с привязкой
                 {
-                    dictionaryBindings[code] = hkey; // то меняем ему привязку
+                    dictionaryBindings.Add(code, hkey);
                     return true;
                 }
-            }
-            else // если кода нет в словаре, то добавляем новый код с привязкой
-            {
-                dictionaryBindings.Add(code, hkey);
-                return true;
             }
         }
 

@@ -434,19 +434,7 @@ namespace DR
         }
     }
 
-    [Serializable]
-    public class Hotkey
-    {
-
-
-        public Hotkey(string textBox, string message)
-        {
-            hotkeyTextBox = textBox;
-            hotkeyForSending = message;
-        }
-
-        public string hotkeyTextBox { get; set; }
-        public string hotkeyForSending { get; set; }
+    
 
         //void fromTextBoxToSending()
         //{
@@ -492,5 +480,5 @@ namespace DR
         //}
 
 
-    }
+    
 }
