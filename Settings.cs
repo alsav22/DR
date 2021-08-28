@@ -17,7 +17,7 @@ namespace DR
     {
         const string fileNameHotKeys = "listKeyboardKeys.dat";
         
-        public static Dictionary <string, Hotkey> dictionaryKeyboardKeys = new Dictionary <string, Hotkey>();
+        Dictionary <string, Hotkey> dictionaryKeyboardKeys = new Dictionary <string, Hotkey>();
         
         public Settings()
         {
@@ -102,7 +102,7 @@ namespace DR
             code.Focus();
         }
 
-        public static bool preparingOfSending(ref string message)
+        public bool preparingOfSending(ref string message)
         {
             StringBuilder temp = new StringBuilder();
 
@@ -155,25 +155,24 @@ namespace DR
                     {
 
                         //hotkey.Clear();
-                        hotkey.Focus();
-                        addbinding.Enabled = false;
+                        
                         //code.Focus();
                     }
                     else
                     {
                         MessageBox.Show("The binding already exists!");
-                        addbinding.Enabled = false;
-                        hotkey.Focus();
+                        
                     }
+                    //hotkey.Focus();
+                    //addbinding.Enabled = false;
                     
                 }
-                else
-                {
+                
                     //hotkey.Clear();
-                    hotkey.Focus();
-                    addbinding.Enabled = false;
+                hotkey.Focus();
+                addbinding.Enabled = false;
                     //code.Focus();
-                }
+                
             }
         }
 
