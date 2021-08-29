@@ -37,13 +37,11 @@ namespace DR
                 if (deviceSearch(ref device))
                 {
                     connection(ref device);
-
                 }
                 else
                     MessageBox.Show("Device not found!");
             }
-
-
+            
             form = new Form1(device.portName, device.ID_VID, device.ID_PID);
             form.Show();
             
@@ -51,6 +49,7 @@ namespace DR
             {
                 MessageBox.Show("The device is connected and ready for use.");
                 
+                // обработчик событий, куда буду приходить сообщения с COM порта
                 device.serialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
                 
                 form.ActiveControl = null;
@@ -59,29 +58,26 @@ namespace DR
 
             if (device.portName != "") // если устройство найдено и подключено
             {
-
-                loadPresets(); // загрузка из файла списка пресетов
-
-                if (!File.Exists(fileNamePresets) || listPresets.Count == 0)
+                if (readKeyboardKeys()) // загрузка из файла списка всех клавиш
+                                        // в файле строки типа: Control ^, или PageUp {PgUp},
+                                        // т.е., до пробела то, что выводится при нажатии на клавишу,
+                                        // после пробела то, что нужно отправлять через SendKeys.
+                {
+                    settings = new Settings();
+                    flagSettings = true;
+                    presetNameBeforeClosing = "";
+                }
+                else
+                {
+                    MessageBox.Show("File " + fileNameKeyboardKeys + " not found!");
+                    return;
+                }
+                
+                if (!loadPresets() || listPresets.Count == 0) // загрузка списка пресетов
                 {
                     MessageBox.Show("There are no presets. Create at least one.");
-                    preset = new Preset();
-                    settings = new Settings();
-                    if (readKeyboardKeys()) // загрузка из файла списка всех горячих клавиш
-                                                // в файле строки типа: Control ^, или PageUp {PgUp},
-                                                // т.е., до пробела то, что выводится при нажатии на клавишу,
-                                                // после пробела то, что нужно отправлять через SendKeys.
-                    {
-                        flagSettings = true;
-                        presetNameBeforeClosing = "";
-                        settings.Show();
-                        
-                    }
-                    else
-                    {
-                        return;
-                    }
-
+                    
+                    preset   = new Preset();
                 }
                 else
                 {
@@ -90,22 +86,12 @@ namespace DR
                     form.PresetNameText = preset.name;
                     presetNameBeforeClosing = preset.name;
                     
-                    settings = new Settings();
-                    if (readKeyboardKeys()) // загрузка из файла списка всех клавиш.
-                                            // В файле строки, типа: Control ^, или PageUp {PgUp},
-                                            // т.е., до пробела то, что выводится при нажатии на клавишу,
-                                            // после пробела то, что нужно отправлять через SendKeys.
+                    //settings = new Settings();
+                    
+                    for (int i = 0; i < listPresets.Count; ++i)
                     {
-                        for (int i = 0; i < listPresets.Count; ++i)
-                        {
-                            settings.presetName.Items.Add(listPresets[i].name);
-                        }
+                        settings.presetName.Items.Add(listPresets[i].name);
                     }
-                    else
-                    {
-                        return;
-                    }
-
                 }
             }
             
@@ -124,7 +110,6 @@ namespace DR
             }
             catch
             {
-                MessageBox.Show("File " + fileNameKeyboardKeys + " not found!");
                 return false;
             }
 
@@ -193,7 +178,6 @@ namespace DR
             }
             catch
             {
-                MessageBox.Show("File presets.dat not found!");
                 return false;
             }
         }
@@ -298,9 +282,19 @@ namespace DR
             //serialPort.Close();
         }
 
-        private void preparingСode(ref string code) // подготовка кода
+        
+        // правильный код, с пульта, приходит в виде или трёх цифр (первая 8), с \r на конце, или в виде
+        // двух цифр (которые были после 8), с \r на конце, если толко после 8 не было 0, тогда одна последняя цифра,
+        // с \r на конце. Например: или 838\r, или 38\r; или 806\r, или 6\r
+        // Следующая функция оставляет за каждой клавишей пульта только один 
+        // вариан кода: или две цифры, или одна цифра. Например: если коды 838 или 38,
+        // то код от этой клавиши пульта будет всегда 38; если коды 806 или 6, то код
+        // всегда будет 6.
+        
+        private void preparingСode(ref string code) // вспомогательная функция,
+                                                    // подготовка кода
         {
-            if (code.Length > 4)
+            if (code.Length > 4) // поступил с пульта изначально неверный код
             {
                 code = "";
                 return;
@@ -315,75 +309,6 @@ namespace DR
                 code = code.Remove(0, 1);
                 if (code[0] == '0')
                     code = code.Remove(0, 1);
-            }
-        }
-
-        void preparingHotkey(ref string hotkeyForOutput)
-        {
-            if (hotkeyForOutput == " ")
-            {
-                hotkeyForOutput = "Space";
-                return;
-            }
-            if (hotkeyForOutput == "") // если код есть в словаре, но не привязан к горячей клавише, то
-                                       // в строке пишется "NO BINDING".
-            {
-                hotkeyForOutput = "NO BINDING";
-                return;
-            }
-            if (hotkeyForOutput == null) // если кода нет в словаре, то строка пустая
-            {
-                hotkeyForOutput = "";
-                return;
-            }
-
-            
-            
-            //hotkeyForOutput = hotkeyForOutput.ToUpper();
-            // читать по ссылке на английском
-            //https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys?view=net-5.0
-            if (hotkeyForOutput.Length == 1 && hotkeyForOutput[0] != '+' && hotkeyForOutput[0] != '%' &&
-                hotkeyForOutput[0] != '~' && hotkeyForOutput[0] != '{' && hotkeyForOutput[0] != '}' && hotkeyForOutput[0] != '('
-                && hotkeyForOutput[0] != ')' && hotkeyForOutput[0] != '^')
-            {
-
-                //SendKeys.SendWait(hotkeyForOutput);
-                Console.WriteLine(hotkeyForOutput);
-            }
-            else if (hotkeyForOutput.Length > 1 && (hotkeyForOutput[0] == '%' || hotkeyForOutput[0] == '+' || hotkeyForOutput[0] == '^'))
-            {
-                StringBuilder temp = new StringBuilder();
-                for (int i = 0; i < hotkeyForOutput.Length; ++i)
-                {
-                    if (hotkeyForOutput[i] == '%') 
-                        temp.Append("Alt+");
-                    else if (hotkeyForOutput[i] == '+')
-                        temp.Append("Shift+");
-                    else if (hotkeyForOutput[i] == '^')
-                        temp.Append("Control+");
-                    //temp.Append('+');
-                }
-                //char ch = hotkeyForOutput[0];
-                //for (int i = 0; i < hotkey.Length; ++i)
-                //{
-                //    if (hotkey[0] == '%' || hotkey[0] == '+' || hotkey[0] == '^')
-                //        hotkey = hotkey.Remove(0, 1);
-                //}
-                char[] beg = { '%', '+', '^' };
-                hotkeyForOutput = hotkeyForOutput.TrimStart(beg);
-                if (hotkeyForOutput == " ")
-                    hotkeyForOutput = "Space";
-                temp.Append(hotkeyForOutput);
-                hotkeyForOutput = temp.ToString();
-
-                Console.WriteLine(hotkeyForOutput);
-                //SendKeys.SendWait(temp.ToString() + "{" + hotkey + "}");
-            }
-            else
-            {
-                Console.WriteLine(hotkeyForOutput);
-                //hotkeyForOutput = temp.ToString();
-                //SendKeys.SendWait("{" + hotkey + "}");
             }
         }
 
@@ -419,38 +344,25 @@ namespace DR
             // читать по ссылке на английском
             //https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys?view=net-5.0
             
-
             string hotkey = "";
             try
             {
                 hotkey = preset.dictionaryBindings[code].hotkeyTextBox; // получение, из словаря, грячей клавиши по коду
-                
             }
             catch
             {
                 hotkey = null; // кода нет в словаре
             }
 
-            //if (hotkey == " ")
-            //    hotkey = "Space";
-            //if (hotkey == "") // если код есть в словаре, но не привязан к горячей клавише, то
-            //                  // в строке пишется "NO BINDING".
-            //    hotkey = "NO BINDING";
-            
             if (hotkey == null) // если кода нет в словаре, то строка пустая
                 hotkey = "";
-
-            
 
             if (settings != null && !settings.IsDisposed)
             {
                 settings.Invoke(new Action(() => { settings.hotkey.Text = hotkey; 
                                                    settings.hotkey.Focus();}));
-                                                    
-                
             }
 
-           
             Thread.Sleep(200);
             if (device.serialPort.IsOpen)
                 device.serialPort.DiscardInBuffer();
@@ -463,42 +375,6 @@ namespace DR
             device.serialPort.DiscardInBuffer();
 
             preparingСode(ref code);
-
-
-  ///////////////////////////////////////////          
-            
-            //if (code == "D")
-                //fff();
-            //char ccc = 's';
-            //List<string> data = new List<string>();
-            //List<string> error = new List<string>();
-            //List<string> done = new List<string>();
-
-            //f(ref data);
-            
-            //int ii = 0;
-           
-                
-            //for (; ii < data.Count; ++ii)
-            //{
-            //    try
-            //    {
-
-            //    SendKeys.SendWait("{" + data[ii] + "}");
-            //    }
-            //    catch
-            //    {
-            //        error.Add(data[ii]);
-            //        continue;
-
-            //    }
-            //    done.Add(data[ii]);
-            //}
-
-            //File.WriteAllLines("Error.txt", error);
-            //File.WriteAllLines("Done.txt", done);
-               
- ///////////////////////////////////////                  
             
             // (Ставятся перед фигурными скобками)
             // SHIFT +
@@ -520,56 +396,12 @@ namespace DR
             string hotkey = "";
             try
             {
-
                 hotkey = preset.dictionaryBindings[code].hotkeyForSending;
                 //hotkey = "{Enter}";
                 SendKeys.SendWait(hotkey);
 
                 // читать по ссылке на английском
                 //https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.sendkeys?view=net-5.0
-                //if (hotkey.Length == 1 && !Char.IsLetter(hotkey[0]) && hotkey[0] != '+' && hotkey[0] != '%' &&
-                //    hotkey[0] != '~' && hotkey[0] != '{' && hotkey[0] != '}' && hotkey[0] != '('
-                //    && hotkey[0] != ')' && hotkey[0] != '^')
-                //{
-
-                //    //if (Char.IsLetter(hotkey[0]))
-                //    //    SendKeys.SendWait("{" + hotkey + "}");
-                //    //else 
-                //        SendKeys.SendWait(hotkey);
-                //    //Console.WriteLine("SendKeys.SendWait(key);");
-                //}
-                //else if (hotkey.Length > 1 && (hotkey[0] == '%' || hotkey[0] == '+' || hotkey[0] == '^'))
-                //{
-                //    StringBuilder temp = new StringBuilder();
-                //    for (int i = 0; i < hotkey.Length; ++i)
-                //    {
-                //        if (hotkey[i] == '%' || hotkey[i] == '+' || hotkey[i] == '^')
-                //            temp.Append(hotkey[i]);
-                //    }
-                //    //char ch = hotkey[0];
-                //    //for (int i = 0; i < hotkey.Length; ++i)
-                //    //{
-                //    //    if (hotkey[0] == '%' || hotkey[0] == '+' || hotkey[0] == '^')
-                //    //        hotkey = hotkey.Remove(0, 1);
-                //    //}
-                //    char[] beg = { '%', '+', '^' };
-                //    hotkey = hotkey.TrimStart(beg);
-                    
-                //    SendKeys.SendWait(temp.ToString() + "{" + hotkey + "}");
-                
-                //}
-                //else
-                //{
-                //    SendKeys.SendWait("{" + hotkey + "}");
-                    
-
-                //}
-
-                ////if (hotkey == " ")
-                ////hotkey = "SPACE";
-                ////if (settings != null && !settings.IsDisposed)
-                ////settings.Invoke(new Action(() => { settings.hotkey.Text = hotkey; }));
-
             }
             catch
             {
@@ -583,74 +415,10 @@ namespace DR
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
-            //Thread.CurrentThread.IsBackground = true;
-            //SerialPort serialPort = (SerialPort)sender;
-            //if (device.serialPort == serialPort)
-                //Console.WriteLine("==");
-            //string message = serialPort.ReadExisting();
             if (flagSettings)
                 settingMode();
             else
                 workingMode();
-            //Thread.CurrentThread.IsBackground = false;
-            //Console.WriteLine(hotkey);
-            //Console.WriteLine(code);
-
-            //// громкость (+ и - на пульте)
-            ////if (message == "82B" || message == "2B")
-            ////    SendKeys.SendWait("{" + Data.player[message] + "}");
-            //////if (message == "82B\r" || message == "2B\r")
-            //////    SendKeys.SendWait("{Up}"); // отправка нажатия
-            ////if (message == "82C\r" || message == "2C\r")
-            //////    SendKeys.SendWait("{Down}");
-
-
-            ////// во весь экран (esc на пульте)
-            ////if (message == "829" || message == "29")
-            ////    SendKeys.SendWait("{ENTER}"); // отправка нажатия
-
-            ////// яркость (1 и 5 на пульте)
-            ////if (message == "801\r" || message == "1\r")
-            ////    SendKeys.SendWait("{e}"); // отправка нажатия
-            ////if (message == "805\r" || message == "5\r")
-            ////    SendKeys.SendWait("{w}");
-
-            ////// контрастность (2 и 6 на пульте)
-            ////if (message == "802\r" || message == "2\r")
-            ////    SendKeys.SendWait("{t}"); // отправка нажатия
-            ////if (message == "806\r" || message == "6\r")
-            ////    SendKeys.SendWait("{r}");
-
-            ////// насыщенность (3 и 7 на пульте)
-            ////if (message == "803\r" || message == "3\r")
-            ////    SendKeys.SendWait("{u}"); // отправка нажатия
-            ////if (message == "807\r" || message == "7\r")
-            ////    SendKeys.SendWait("{y}");
-
-            ////// пауза (OK на пульте)
-            ////if (message == "80D\r" || message == "D\r")
-            ////    SendKeys.SendWait(" "); // отправка нажатия
-
-            ////// вперёд (стрелка вправо на пульте)
-            ////if (message == "810\r" || message == "10\r")
-            ////    SendKeys.SendWait("{RIGHT}"); // отправка нажатия
-            ////// назад (стрелка влево на пульте)
-            ////if (message == "811\r" || message == "11\r")
-            ////    SendKeys.SendWait("{LEFT}");
-
-            ////// добавить закладку (рядом с выключить на пульте)
-            ////if (message == "80F\r" || message == "F\r")
-            ////    SendKeys.SendWait("{p}"); // отправка нажатия
-
-            ////// выход (значок включения/выключения на пульте)
-            ////if (message == "80C\r" || message == "C\r")
-            ////{
-            ////    SendKeys.SendWait("%{F4}");
-            ////    //serialPort.Close();
-            ////}
-
-
-
         }
-}
+    }
 }
