@@ -17,7 +17,7 @@ namespace DR
     
     partial class Form1 : Form
     {
-        static TextBox _tb;
+        //static TextBox _tb;
         
         public string PresetNameText { get { return presetName.Text; } set { presetName.Text = value; } }
 
@@ -25,14 +25,6 @@ namespace DR
         {
             InitializeComponent();
 
-            /////////////////////////////
-
-            WinEventDelegate dele = new WinEventDelegate(WinEventProc);
-            IntPtr m_hhook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
-            _tb = this.processName;
-
-            /////////////////////////////
-            
             this.portName.Text = portName;
             id_vid.Text = ID_VID;
             id_pid.Text = ID_PID;
@@ -55,6 +47,11 @@ namespace DR
                 presetName.ReadOnly  = true;
             }
             notifyIcon1.Visible = false;
+
+ ///////////////////////////// для посика и вывода названия активного окна
+            WinEventDelegate dele = new WinEventDelegate(WinEventProc);
+            IntPtr m_hhook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, dele, 0, 0, WINEVENT_OUTOFCONTEXT);
+/////////////////////////////
             
         }
 
@@ -179,15 +176,17 @@ namespace DR
             Application.Exit();
             
         }
-///////////////////////////////////
+
+/////////////////////////////////// поиск и вывод названия активного окна
         
-        private static void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
+        private void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
             string wTitle = GetActiveWindowTitle();
-            _tb.Clear();
-            _tb.AppendText((!String.IsNullOrEmpty(wTitle) ? wTitle : "Empty") + "\r\n"); // вместо этого реализуйте метод записи в файл
+            processName.Clear();
+            processName.AppendText(!String.IsNullOrEmpty(wTitle) ? wTitle : "Empty");
         }
  
+        // получение названия активного окна
         private static string GetActiveWindowTitle()
         {
             const int nChars = 256;
@@ -201,10 +200,7 @@ namespace DR
             }
             return null;
         }
- 
- 
- //////////////////////////////////////
- 
+        
         [DllImport("user32.dll")]
         static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
         private const uint WINEVENT_OUTOFCONTEXT = 0;
@@ -213,6 +209,8 @@ namespace DR
         static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")]
         static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
+//////////////////////////////////////
     }
     
 }
